@@ -14,7 +14,12 @@ import json
 import os
 import re
 import sys
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+
+def today_kst():
+    return datetime.now(ZoneInfo("Asia/Seoul")).date().isoformat()
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CFG = json.load(open(os.path.join(ROOT, "tools", "site.json"), encoding="utf-8"))
@@ -138,7 +143,7 @@ def date_ko(d):
 def main():
     cdir = os.path.join(ROOT, "content", "columns")
     posts = [parse(os.path.join(cdir, f)) for f in sorted(os.listdir(cdir)) if f.endswith(".md")]
-    posts = [p for p in posts if p["date"] <= date.today().isoformat()]
+    posts = [p for p in posts if p["date"] <= today_kst()]
     posts.sort(key=lambda p: p["date"], reverse=True)
     slugs = [p["slug"] for p in posts]
     if len(slugs) != len(set(slugs)):
@@ -230,7 +235,7 @@ def main():
         s = s[: s.index(a) + len(a)] + "\n" + block + "\n" + s[s.index(b):]
         open(ip, "w", encoding="utf-8").write(s)
 
-    today = date.today().isoformat()
+    today = today_kst()
     urls = [(URL + "/", posts[0]["date"] if posts else today, "1.0"), (URL + "/column/", posts[0]["date"] if posts else today, "0.8")]
     urls += [("%s/column/%s/" % (URL, p["slug"]), p.get("updated") or p["date"], "0.7") for p in posts]
     sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
